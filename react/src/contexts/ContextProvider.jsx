@@ -1,18 +1,17 @@
 import { createContext, useContext, useState } from "react";
 
 const StateContext = createContext({
-    currentUser: {},
-    userToken: null,
-    surveys:[],
-    setUserToken: () => {},
-    setCurrentUser: () => {},
+  currentUser: {},
+  userToken: null,
+  surveys: [],
+  setUserToken: () => {},
+  setCurrentUser: () => {},
 });
-
 
 const tmpSurveys = [
   {
     id: 1,
-    image_url: "https://api.yoursurveys.xyz/images/vJutXzn02CDwdOyh.png",
+    image_url: "https://picsum.photos/seed/picsum/200/300",
     title: "TheCodeholic YouTube channel",
     slug: "thecodeholic-youtube-channel",
     status: true,
@@ -160,7 +159,7 @@ const tmpSurveys = [
   },
   {
     id: 2,
-    image_url: "https://api.yoursurveys.xyz/images/gjIHElz4aKrL0nT0.png",
+    image_url: "https://picsum.photos/seed/picsum/200",
     title: "React",
     slug: "react",
     status: true,
@@ -173,7 +172,7 @@ const tmpSurveys = [
   },
   {
     id: 3,
-    image_url: "https://api.yoursurveys.xyz/images/WPfzo0g66huUYYwR.png",
+    image_url: "https://picsum.photos/seed/picsum/200",
     title: "Laravel 9",
     slug: "laravel-9",
     status: true,
@@ -186,11 +185,20 @@ const tmpSurveys = [
   },
 ];
 
-
 export const ContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState({});
-  const [userToken, setUserToken] = useState('123');
-  const [surveys, setSurveys] = useState(tmpSurveys)
+  const [userToken, _setUserToken] = useState(localStorage.getItem('TOKEN') || '');
+  const [surveys, setSurveys] = useState(tmpSurveys);
+
+  const setUserToken = (token) => {
+    if (token) {
+      localStorage.setItem("TOKEN", token);
+    } else {
+      localStorage.getItem("TOKEN");
+    }
+    _setUserToken(token);
+  };
+
   return (
     <StateContext.Provider
       value={{
@@ -198,7 +206,7 @@ export const ContextProvider = ({ children }) => {
         setCurrentUser,
         userToken,
         setUserToken,
-        surveys
+        surveys,
       }}
     >
       {children}
@@ -206,5 +214,4 @@ export const ContextProvider = ({ children }) => {
   );
 };
 
-
-export const useStateContext = () => useContext(StateContext)
+export const useStateContext = () => useContext(StateContext);
