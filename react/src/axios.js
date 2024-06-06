@@ -6,7 +6,7 @@ const axiosClient = axios.create({
 });
 
 axiosClient.interceptors.request.use((config) => {
-  const token = 123; // Replace with actual token logic
+  const token = localStorage.getItem('TOKEN'); // Replace with actual token logic
   config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

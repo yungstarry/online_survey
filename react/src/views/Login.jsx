@@ -1,6 +1,41 @@
+import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import axiosClient from "../axios";
+import { useStateContext } from "../contexts/ContextProvider";
+
 
 export default function Login() {
+  const {register, reset,  setError,   handleSubmit, formState:{errors}} = useForm()
+
+  const {setCurrentUser, setUserToken} = useStateContext()
+
+  const onSubmit = async (formData) => {
+    console.log(formData)
+    try {
+      const response = await axiosClient.post("/login", formData);
+      const { data } = response;
+
+      setCurrentUser(data.user);
+      setUserToken(data.token);
+    } catch (error) {
+      console.log(error.response)
+      if (error.response && error.response.status === 422) {
+        const errorMessage = error.response.data.error;
+        console.error("Validation Errors: ", errorMessage);
+        
+        // Assuming the error is related to email and/or password
+        setError("email", {
+          type: "manual",
+          message: errorMessage,
+        });
+        setError("password", {
+          type: "manual",
+          message: errorMessage,
+        });
+      }
+    
+    }
+  }
   return (
     <>
       <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
@@ -8,7 +43,12 @@ export default function Login() {
       </h2>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6" action="#" method="POST">
+        <form
+          className="space-y-6"
+          action="#"
+          method="POST"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <div>
             <label
               htmlFor="email"
@@ -19,12 +59,12 @@ export default function Login() {
             <div className="mt-2">
               <input
                 id="email"
-                name="email"
                 type="email"
                 autoComplete="email"
-                required
+                {...register("email", { required: "Email is required" })}
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
+              {errors.email && <p className="text-red-500">{errors.email.message}</p>}
             </div>
           </div>
 
@@ -48,12 +88,13 @@ export default function Login() {
             <div className="mt-2">
               <input
                 id="password"
-                name="password"
                 type="password"
-                autoComplete="current-password"
-                required
+                {...register("password", { required: true })}
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
+              {errors.password && (
+                <p className="text-red-500">{errors.password.message}</p>
+              )}
             </div>
           </div>
 

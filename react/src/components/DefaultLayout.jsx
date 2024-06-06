@@ -12,6 +12,7 @@ import {
 import { Bars3Icon, UserIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
+import axiosClient from "../axios";
 
 const navigation = [
   { name: "Dashboard", to: "/" },
@@ -23,14 +24,24 @@ function classNames(...classes) {
 }
 
 export default function DefaultLayout() {
-  const { currentUser: user, userToken } = useStateContext();
+  const { currentUser: user, userToken, setCurrentUser,setUserToken } = useStateContext();
 
   if (!userToken) {
     return <Navigate to={'login'} />
   }
-  const logout = (e) => {
+  const logout = async (e) => {
     e.preventDefault();
-    console.log("logout");
+    try {
+     const response = await axiosClient.post("/logout");
+     console.log(response.data);
+      setCurrentUser({});
+      setUserToken(null);
+      localStorage.removeItem('TOKEN')
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+   
+
   };
 
   return (
@@ -94,7 +105,7 @@ export default function DefaultLayout() {
                             <MenuItem>
                               <a
                                 href="#"
-                                onClick={(ev) => logout(ev)}
+                                onClick={logout}
                                 className="bg-gray-100 block px-4 py-2 text-sm text-gray-700"
                               >
                                 Sign out
