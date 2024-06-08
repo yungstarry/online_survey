@@ -7,11 +7,13 @@ import Signup from "./views/Signup";
 import GuestLayout from "./components/GuestLayout";
 import DefaultLayout from "./components/DefaultLayout";
 import SurveyView from "./views/SurveyView";
+import ErrorPage from "./components/core/ErrorPage";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <DefaultLayout />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "/dashboard",

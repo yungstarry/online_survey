@@ -6,7 +6,7 @@ const axiosClient = axios.create({
 });
 
 axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('TOKEN'); // Replace with actual token logic
+  const token = localStorage.getItem("TOKEN"); // Replace with actual token logic
   config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -17,7 +17,9 @@ axiosClient.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      router.navigate("/login");
+      localStorage.removeItem('Token')
+      window.location.reload()
+      // router.navigate("/login");
       return error;
     } else if (error.response?.status === 422) {
       console.error("Validation Errors: ", error.response.data.errors);

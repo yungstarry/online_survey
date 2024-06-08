@@ -1,31 +1,100 @@
-import { useState } from "react";
 import PageComponent from "../components/PageComponent";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import TButton from "../components/core/TButton";
+import axiosClient from "../axios";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import SurveyQuestions from "../components/SurveyQuestions";
+import { useEffect } from "react";
 
 const SurveyView = () => {
-  const [survey, setSurvey] = useState({
-    title: "",
-    slug: "",
-    status: false,
-    description: "",
-    image: null,
-    image_url: null,
-    expire_date: "",
-    questions: [],
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    setError,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      title: "",
+      slug: "",
+      status: false,
+      description: "",
+      image: null,
+      image_url: null,
+      expire_date: "",
+      questions: [],
+    },
+  });
+  const queryClient = useQueryClient();
+  const survey = watch();
+
+  const createSurvey = async (survey) => {
+    const payload = { ...survey };
+    if (payload.image) {
+      payload.image = payload.image_url;
+    }
+    delete payload.image_url;
+    const res = await axiosClient.post("/survey", payload);
+    const { data } = res;
+    console.log(data);
+    navigate("/surveys");
+  };
+
+  const mutatation = useMutation({
+    mutationFn: createSurvey,
+    mutationKey: "survey",
+    onSuccess: () => {
+      toast.success("New Survey sucessfully created");
+      queryClient.invalidateQueries({
+        queryKey: ["survey"],
+      });
+      reset();
+    },
+    onError: (error) => {
+      const errorMessage = error.response?.data?.message || error.message;
+      toast.error(`Error: ${errorMessage}`);
+
+      // Handle validation errors from the server
+      if (error.response?.data?.errors) {
+        Object.entries(error.response.data.errors).forEach(([key, value]) => {
+          setError(key, { type: "server", message: value });
+        });
+      }
+    },
   });
 
-  const onSubmit = (e) => {
-    e.preventDefault()
-    console.log(e)
-};
-const onImageChoose = () => {
-      console.log("on image chose");
-
+  const onImageChoose = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      setValue("image", file);
+      setValue("image_url", reader.result);
+      e.target.value = "";
+    };
+    reader.readAsDataURL(file);
   };
+
+  const onSubmit = (data) => {
+    mutatation.mutate(data);
+  };
+
+  const onSurveyUpdate = (updatedSurvey) => {
+    setValue("questions", updatedSurvey.questions);
+  };
+
+  useEffect(() => {
+    setValue("questions", survey.questions);
+  }, [survey, setValue]);
+
   return (
     <PageComponent title={"Create new Survey"}>
-      <form action="#" method="post" onSubmit={onSubmit}>
+      <form method="post" onSubmit={handleSubmit(onSubmit)}>
         <div className="shadow sm:overflow-hidden sm:rounded-md">
           <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
             {/* image */}
@@ -67,15 +136,19 @@ const onImageChoose = () => {
               </label>
               <input
                 type="text"
-                name="title"
-                id="title"
-                value={survey.title}
-                onChange={(e) =>
-                  setSurvey({ ...survey, title: e.target.value })
-                }
+                {...register("title", {
+                  required: "Title is required",
+                  minLength: {
+                    value: 3,
+                    message: "Title must be at least 3 characters long",
+                  },
+                })}
                 placeholder="Survey title"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-md focus:border-indigo-50 focus:ring-indigo-500 sm:text-sm"
               />
+              {errors.title && (
+                <p className="text-red-500">{errors.title.message}</p>
+              )}
             </div>
             {/* title */}
             {/* description */}
@@ -85,12 +158,7 @@ const onImageChoose = () => {
               </label>
               <textarea
                 type="text"
-                name="description"
-                id="description"
-                value={survey.description}
-                onChange={(e) =>
-                  setSurvey({ ...survey, description: e.target.value })
-                }
+                {...register("description")}
                 placeholder="Survey description"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-md focus:border-indigo-50 focus:ring-indigo-500 sm:text-sm"
               />
@@ -106,15 +174,13 @@ const onImageChoose = () => {
               </label>
               <input
                 type="date"
-                name="expire_date"
-                id="expire_date"
-                value={survey.expire_date}
-                onChange={(e) =>
-                  setSurvey({ ...survey, expire_date: e.target.value })
-                }
+                {...register("expire_date")}
                 placeholder="Survey description"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-md focus:border-indigo-50 focus:ring-indigo-500 sm:text-sm"
               />
+              {errors.expire_date && (
+                <p className="text-red-500">{errors.expire_date.message}</p>
+              )}
             </div>
             {/* Expiry date */}
 
@@ -123,12 +189,7 @@ const onImageChoose = () => {
               <div className="flex h-5 items-center">
                 <input
                   type="checkbox"
-                  name="status"
-                  id="status"
-                  checked={survey.status}
-                  onChange={(e) =>
-                    setSurvey({ ...survey, status: e.target.checked })
-                  }
+                  {...register("status")}
                   className=" h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
               </div>
@@ -142,6 +203,10 @@ const onImageChoose = () => {
               </div>
             </div>
             {/* Active */}
+
+            {/* survey Questions */}
+            <SurveyQuestions survey={survey} onSurveyUpdate={onSurveyUpdate} />
+            {/* survey Questions */}
             <div className=" bg-gray-50 px-4 py-3 text-right sm:px-6">
               <TButton>Save</TButton>
             </div>

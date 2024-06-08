@@ -4,6 +4,7 @@ const StateContext = createContext({
   currentUser: {},
   userToken: null,
   surveys: [],
+  questionTypes: [],
   setUserToken: () => {},
   setCurrentUser: () => {},
 });
@@ -204,6 +205,7 @@ export const ContextProvider = ({ children }) => {
       value={{
         currentUser,
         setCurrentUser,
+        questionTypes,
         userToken,
         setUserToken,
         surveys,
