@@ -13,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class SurveyController extends Controller
@@ -192,9 +193,10 @@ class SurveyController extends Controller
             [
                 'question' => 'required|string',
                 'type' => ['required', new Enum(QuestionTypeEnum::class)],
+
                 'description' => 'nullable|string',
                 'data' => 'present',
-                'survey_id' => 'exists::App\Models\Survey,id'
+                'survey_id' => 'exists:App\Models\Survey,id'
             ]
 
         );

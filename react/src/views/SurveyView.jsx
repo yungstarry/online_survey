@@ -46,11 +46,11 @@ const SurveyView = () => {
     navigate("/surveys");
   };
 
-  const mutatation = useMutation({
+  const mutation = useMutation({
     mutationFn: createSurvey,
     mutationKey: "survey",
     onSuccess: () => {
-      toast.success("New Survey sucessfully created");
+      toast.success("New Survey successfully created");
       queryClient.invalidateQueries({
         queryKey: ["survey"],
       });
@@ -81,16 +81,18 @@ const SurveyView = () => {
   };
 
   const onSubmit = (data) => {
-    mutatation.mutate(data);
+    mutation.mutate(data);
   };
 
-  const onSurveyUpdate = (updatedSurvey) => {
-    setValue("questions", updatedSurvey.questions);
+  const onQuestionUpdate = (question) => {
+    setValue("questions", question);
   };
 
   useEffect(() => {
-    setValue("questions", survey.questions);
-  }, [survey, setValue]);
+    if (survey.questions && survey.questions.length) {
+      setValue("questions", survey.questions);
+    }
+  }, [setValue]);
 
   return (
     <PageComponent title={"Create new Survey"}>
@@ -154,7 +156,7 @@ const SurveyView = () => {
             {/* description */}
             <div className=" col-span-6 sm:col-span-3">
               <label className=" block text-sm font-medium text-gray-700">
-                description
+                Description
               </label>
               <textarea
                 type="text"
@@ -175,7 +177,7 @@ const SurveyView = () => {
               <input
                 type="date"
                 {...register("expire_date")}
-                placeholder="Survey description"
+                placeholder="Survey expire date"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-md focus:border-indigo-50 focus:ring-indigo-500 sm:text-sm"
               />
               {errors.expire_date && (
@@ -194,20 +196,23 @@ const SurveyView = () => {
                 />
               </div>
               <div className="ml-3 text-sm">
-                <label htmlFor="comments" className="font-medium text-gray-700">
+                <label htmlFor="status" className="font-medium text-gray-700">
                   Active
                 </label>
                 <p className="text-gray-500">
-                  Where to make survey publicly available
+                  Set whether the survey is active or not
                 </p>
               </div>
             </div>
             {/* Active */}
 
-            {/* survey Questions */}
-            <SurveyQuestions survey={survey} onSurveyUpdate={onSurveyUpdate} />
-            {/* survey Questions */}
-            <div className=" bg-gray-50 px-4 py-3 text-right sm:px-6">
+            {/* Survey Questions */}
+            <SurveyQuestions
+              questions={survey.questions}
+              onQuestionUpdate={onQuestionUpdate}
+            />
+            {/* Survey Questions */}
+            <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
               <TButton>Save</TButton>
             </div>
           </div>
@@ -218,3 +223,4 @@ const SurveyView = () => {
 };
 
 export default SurveyView;
+

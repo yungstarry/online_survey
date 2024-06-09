@@ -22,6 +22,7 @@ class Survey extends Model
         'expire_date',
         'created_at',
         'updated_at',
+        'question',
     ];
 
     /**
