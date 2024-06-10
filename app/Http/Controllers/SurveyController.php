@@ -77,35 +77,37 @@ class SurveyController extends Controller
     {
         $data = $request->validated();
 
-        //check if image was given and save on local file system
+        // Check if image was given and save on local file system
         if (isset($data['image'])) {
             $relativePath = $this->saveImage($data['image']);
             $data['image'] = $relativePath;
         }
 
+        // Delete old image if it exists
         if ($survey->image) {
             $absolutePath = public_path($survey->image);
             File::delete($absolutePath);
         }
-        //update survey in the database
+
+        // Update survey in the database
         $survey->update($data);
 
-        //get ids a plain arra of existing questions
+        // Get IDs as a plain array of existing questions
         $existingIds = $survey->questions()->pluck('id')->toArray();
 
-        //get ids as plain array of the new questions
+        // Get IDs as a plain array of the new questions
         $newIds = Arr::pluck($data['questions'], 'id');
 
-        //finde questions to delete
+        // Find questions to delete
         $toDelete = array_diff($existingIds, $newIds);
 
-        //find questions to add
+        // Find questions to add
         $toAdd = array_diff($newIds, $existingIds);
 
-        //Delete question by $toDelete array
+        // Delete questions by $toDelete array
         SurveyQuestion::destroy($toDelete);
 
-        //create new question
+        // Create new questions
         foreach ($data['questions'] as $question) {
             if (in_array($question['id'], $toAdd)) {
                 $question['survey_id'] = $survey->id;
@@ -113,16 +115,18 @@ class SurveyController extends Controller
             }
         }
 
-        //update existing question
-        $questionMap = collect($data['question'])->keyBy('id');
+        // Update existing questions
+        $questionMap = collect($data['questions'])->keyBy('id');
 
         foreach ($survey->questions as $question) {
             if (isset($questionMap[$question->id])) {
                 $this->updateQuestion($question, $questionMap[$question->id]);
             }
         }
+
         return new SurveyResource($survey);
     }
+
 
     /**
      * Remove the specified resource from storage.

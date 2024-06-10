@@ -6,6 +6,7 @@ import TButton from "../components/core/TButton";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import axiosClient from "../axios";
 import { PaginationLinks } from "../components/PaginationLinks";
+import router from "../router";
 
 const Surveys = () => {
   // const { surveys } = useStateContext();
@@ -14,8 +15,10 @@ const Surveys = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const onDeleteClick = () => {
-    console.log("on Delete call");
+  const onDeleteClick = (id) => {
+    if (window.confirm("Are you sure you want to delete this surve")) {
+      axiosClient.delete(`survey/${id}`).then(() => getSurveys());
+    }
   };
 
   const onPageClick = (link) => {
