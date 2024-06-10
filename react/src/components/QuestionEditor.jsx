@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useStateContext } from "../contexts/ContextProvider";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-
+import { useStateContext } from "../contexts/ContextProvider";
 
 const QuestionEditor = ({
   index = 0,
@@ -31,10 +30,10 @@ const QuestionEditor = ({
           <button
             type="button"
             className="flex items-center text-xs py-1 px-3 mr-2 rounded-sm text-white bg-gray-600 hover:bg-gray-700"
-            onClick={ () =>  addQuestion(index + 1)}
+            onClick={() => addQuestion()}
           >
             <PlusIcon className="w-4" />
-            add
+            Add
           </button>
           <button
             type="button"
@@ -46,12 +45,11 @@ const QuestionEditor = ({
           </button>
         </div>
       </div>
-      {/* Question Text */}
       <div className="flex justify-between mb-3">
         <div className="flex-1">
           <label
             htmlFor="question"
-            className=" block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700"
           >
             Question
           </label>
@@ -61,11 +59,9 @@ const QuestionEditor = ({
             id="question"
             value={model.question}
             onChange={(e) => setModel({ ...model, question: e.target.value })}
-            className=" mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
         </div>
-        {/* Question Text */}
-        {/* Question Type */}
         <div>
           <label
             htmlFor="questionType"
@@ -76,23 +72,18 @@ const QuestionEditor = ({
           <select
             name="questionType"
             id="questionType"
+            value={model.type}
             onChange={(e) => setModel({ ...model, type: e.target.value })}
-            className=" mt-1 block w-full rounded-md border border-r-gray-300 bg-white ml-2 py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-r-gray-300 bg-white ml-2 py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
           >
             {questionTypes.map((type, ind) => (
-              <option
-                key={ind}
-                value={type}
-                //   defaultValue={model.type == type}
-              >
+              <option key={ind} value={type}>
                 {upperCaseFirst(type)}
               </option>
             ))}
           </select>
         </div>
       </div>
-      {/* Question Type */}
-      {/* Question description */}
       <div>
         <label
           htmlFor="questionDescription"
@@ -108,7 +99,6 @@ const QuestionEditor = ({
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
         ></textarea>
       </div>
-      {/* Question description */}
     </div>
   );
 };

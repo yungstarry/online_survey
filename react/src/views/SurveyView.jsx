@@ -1,38 +1,30 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import PageComponent from "../components/PageComponent";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import TButton from "../components/core/TButton";
 import axiosClient from "../axios";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import SurveyQuestions from "../components/SurveyQuestions";
-import { useEffect } from "react";
 
 const SurveyView = () => {
   const navigate = useNavigate();
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-    setError,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      title: "",
-      slug: "",
-      status: false,
-      description: "",
-      image: null,
-      image_url: null,
-      expire_date: "",
-      questions: [],
-    },
-  });
+  const { id } = useParams();
   const queryClient = useQueryClient();
-  const survey = watch();
+
+  const [survey, setSurvey] = useState({
+    title: "",
+    slug: "",
+    status: false,
+    description: "",
+    image: null,
+    image_url: null,
+    expire_date: "",
+    questions: [], // Ensure this is always initialized as an array
+  });
+ 
+
 
   const createSurvey = async (survey) => {
     const payload = { ...survey };
@@ -54,62 +46,91 @@ const SurveyView = () => {
       queryClient.invalidateQueries({
         queryKey: ["survey"],
       });
-      reset();
+      resetForm();
     },
     onError: (error) => {
       const errorMessage = error.response?.data?.message || error.message;
-      toast.error(`Error: ${errorMessage}`);
-
-      // Handle validation errors from the server
-      if (error.response?.data?.errors) {
-        Object.entries(error.response.data.errors).forEach(([key, value]) => {
-          setError(key, { type: "server", message: value });
-        });
-      }
+      toast.error(`Error: ${errorMessage}`); // Handle validation errors from the server
     },
   });
+
+  const resetForm = () => {
+    setSurvey({
+      title: "",
+      slug: "",
+      status: false,
+      description: "",
+      image: null,
+      image_url: null,
+      expire_date: "",
+      questions: [],
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setSurvey((prevSurvey) => ({
+      ...prevSurvey,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
   const onImageChoose = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
     reader.onload = () => {
-      setValue("image", file);
-      setValue("image_url", reader.result);
+      setSurvey((prevSurvey) => ({
+        ...prevSurvey,
+        image: file,
+        image_url: reader.result,
+      }));
       e.target.value = "";
     };
     reader.readAsDataURL(file);
   };
 
-  const onSubmit = (data) => {
-    mutation.mutate(data);
+  const onSubmit = (e) => {
+    e.preventDefault();
+    for (const question of survey.questions) {
+      if (!question.question.trim()) {
+        toast.error("Each question must have a question field filled.");
+        return;
+      }
+    }
+    mutation.mutate(survey);
   };
 
-  const onQuestionUpdate = (question) => {
-    setValue("questions", question);
+  const onQuestionUpdate = (questions) => {
+    setSurvey((prevSurvey) => ({
+      ...prevSurvey,
+      questions,
+    }));
   };
 
   useEffect(() => {
-    if (survey.questions && survey.questions.length) {
-      setValue("questions", survey.questions);
+    if (id) {
+      axiosClient.get(`/survey/${id}`).then(({ data }) => {
+        setSurvey(data.data);
+              });
     }
-  }, [setValue]);
+  }, [id, survey]);
 
   return (
     <PageComponent title={"Create new Survey"}>
-      <form method="post" onSubmit={handleSubmit(onSubmit)}>
+      <form method="post" onSubmit={onSubmit}>
         <div className="shadow sm:overflow-hidden sm:rounded-md">
           <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
             {/* image */}
             <div>
-              <label className=" block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Photo
               </label>
               <div className="mt-1 flex items-center">
                 {survey.image_url && (
                   <img
                     src={survey.image_url}
-                    alt=""
-                    className=" w-32 h-32 object-cover"
+                    alt={survey.title}
+                    className="w-32 h-32 object-cover"
                   />
                 )}
                 {!survey.image_url && (
@@ -119,11 +140,11 @@ const SurveyView = () => {
                 )}
                 <button
                   type="button"
-                  className=" relative ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="relative ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   <input
                     type="file"
-                    className=" absolute left-0 top-0 bottom-0 opacity-0"
+                    className="absolute left-0 top-0 bottom-0 opacity-0"
                     onChange={onImageChoose}
                   />
                   Change
@@ -132,67 +153,61 @@ const SurveyView = () => {
             </div>
             {/* image */}
             {/* title */}
-            <div className=" col-span-6 sm:col-span-3">
-              <label className=" block text-sm font-medium text-gray-700">
+            <div className="col-span-6 sm:col-span-3">
+              <label className="block text-sm font-medium text-gray-700">
                 Title
               </label>
               <input
                 type="text"
-                {...register("title", {
-                  required: "Title is required",
-                  minLength: {
-                    value: 3,
-                    message: "Title must be at least 3 characters long",
-                  },
-                })}
+                name="title"
+                value={survey.title}
+                onChange={handleInputChange}
                 placeholder="Survey title"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-md focus:border-indigo-50 focus:ring-indigo-500 sm:text-sm"
               />
-              {errors.title && (
-                <p className="text-red-500">{errors.title.message}</p>
-              )}
             </div>
             {/* title */}
             {/* description */}
-            <div className=" col-span-6 sm:col-span-3">
-              <label className=" block text-sm font-medium text-gray-700">
+            <div className="col-span-6 sm:col-span-3">
+              <label className="block text-sm font-medium text-gray-700">
                 Description
               </label>
               <textarea
-                type="text"
-                {...register("description")}
+                name="description"
+                value={survey.description}
+                onChange={handleInputChange}
                 placeholder="Survey description"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-md focus:border-indigo-50 focus:ring-indigo-500 sm:text-sm"
               />
             </div>
             {/* description */}
             {/* Expiry date */}
-            <div className=" col-span-6 sm:col-span-3">
+            <div className="col-span-6 sm:col-span-3">
               <label
                 htmlFor="expire_date"
-                className=" block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700"
               >
                 Expire Date
               </label>
               <input
                 type="date"
-                {...register("expire_date")}
+                name="expire_date"
+                value={survey.expire_date}
+                onChange={handleInputChange}
                 placeholder="Survey expire date"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-md focus:border-indigo-50 focus:ring-indigo-500 sm:text-sm"
               />
-              {errors.expire_date && (
-                <p className="text-red-500">{errors.expire_date.message}</p>
-              )}
             </div>
             {/* Expiry date */}
-
             {/* Active */}
             <div className="flex items-start">
               <div className="flex h-5 items-center">
                 <input
                   type="checkbox"
-                  {...register("status")}
-                  className=" h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  name="status"
+                  checked={survey.status}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
               </div>
               <div className="ml-3 text-sm">
@@ -205,7 +220,6 @@ const SurveyView = () => {
               </div>
             </div>
             {/* Active */}
-
             {/* Survey Questions */}
             <SurveyQuestions
               questions={survey.questions}
@@ -223,4 +237,3 @@ const SurveyView = () => {
 };
 
 export default SurveyView;
-

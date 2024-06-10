@@ -1,12 +1,15 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useState } from "react";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import QuestionEditor from "./QuestionEditor";
 
 const SurveyQuestions = ({ questions, onQuestionUpdate }) => {
-  const [myQuestion, setmyQuestion] = useState([...questions]);
+  const [myQuestions, setMyQuestions] = useState([]);
 
-  const addQuestion = (index) => {
-    index = index !== undefined ? index : myQuestion.length;
+  useEffect(() => {
+    setMyQuestions(questions);
+  }, [questions]);
+
+  const addQuestion = () => {
     const newQuestion = {
       id: crypto.randomUUID(),
       type: "text",
@@ -14,36 +17,28 @@ const SurveyQuestions = ({ questions, onQuestionUpdate }) => {
       description: "",
       data: {},
     };
-    const newQuestions = [...myQuestion];
-    newQuestions.splice(index, 0, newQuestion);
-    setmyQuestion(newQuestions); // Update state with newQuestions
 
-    onQuestionUpdate(newQuestions); // Pass newQuestions to callback
+    const updatedQuestions = [...myQuestions, newQuestion];
+    setMyQuestions(updatedQuestions);
+    onQuestionUpdate(updatedQuestions);
   };
 
-  const questionChange = (question) => {
-    if (!question) return;
-    const newQuestion = myQuestion.map((q) => {
-      if (q.id === question.id) {
-        return { ...question };
-      }
-      return q;
-    });
-    setmyQuestion(newQuestion);
-    onQuestionUpdate(newQuestion);
+  const questionChange = (updatedQuestion) => {
+    if (!updatedQuestion) return;
+    const updatedQuestions = myQuestions.map((q) =>
+      q.id === updatedQuestion.id ? { ...updatedQuestion } : q
+    );
+    setMyQuestions(updatedQuestions);
+    onQuestionUpdate(updatedQuestions);
   };
 
-  const deleteQuestion = (question) => {
-    const newQuestions = myQuestion.filter((q) => q.id !== question.id);
-    setmyQuestion(newQuestions);
-    onQuestionUpdate(newQuestions);
+  const deleteQuestion = (questionToDelete) => {
+    const updatedQuestions = myQuestions.filter(
+      (q) => q.id !== questionToDelete.id
+    );
+    setMyQuestions(updatedQuestions);
+    onQuestionUpdate(updatedQuestions);
   };
-
-  useEffect(() => {
-    setmyQuestion(questions)
-  
-  }, [questions])
-  
 
   return (
     <>
@@ -52,18 +47,18 @@ const SurveyQuestions = ({ questions, onQuestionUpdate }) => {
         <button
           type="button"
           className="flex items-center text-sm py-1 px-4 rounded-sm text-white bg-gray-600 hover:bg-gray-700"
-          onClick={() => addQuestion()}
+          onClick={addQuestion}
         >
           <PlusIcon className="w-4 mr-2" />
           Add Question
         </button>
       </div>
-      {!myQuestion.length ? ( // Check if myQuestion is empty
+      {!myQuestions.length ? (
         <div className="text-gray-400 text-center py-4">
           You don't have any question created
         </div>
       ) : (
-        myQuestion.map((q, ind) => (
+        myQuestions.map((q, ind) => (
           <QuestionEditor
             key={q.id}
             index={ind}

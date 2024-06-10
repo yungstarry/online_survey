@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import {
   Disclosure,
   DisclosureButton,
@@ -24,25 +24,33 @@ function classNames(...classes) {
 }
 
 export default function DefaultLayout() {
-  const { currentUser: user, userToken, setCurrentUser,setUserToken } = useStateContext();
+  const {
+    currentUser: user,
+    userToken,
+    setCurrentUser,
+    setUserToken,
+  } = useStateContext();
 
   if (!userToken) {
-    return <Navigate to={'login'} />
+    return <Navigate to={"login"} />;
   }
   const logout = async (e) => {
     e.preventDefault();
     try {
-     const response = await axiosClient.post("/logout");
-     console.log(response.data);
+      const response = await axiosClient.post("/logout");
+      console.log(response.data);
       setCurrentUser({});
       setUserToken(null);
-      localStorage.removeItem('TOKEN')
+      localStorage.removeItem("TOKEN");
     } catch (error) {
       console.error("Logout failed:", error);
     }
-   
-
   };
+  useEffect(() => {
+    axiosClient.get("/me").then(({data}) => {
+      setCurrentUser(data);
+    });
+  }, []);
 
   return (
     <>
@@ -62,7 +70,6 @@ export default function DefaultLayout() {
                     </div>
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
-                    
                         {navigation.map((item) => (
                           <NavLink
                             key={item.name}
