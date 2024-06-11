@@ -18,15 +18,10 @@ const Surveys = () => {
 
   const onDeleteClick = (id) => {
     if (window.confirm("Are you sure you want to delete this surve")) {
-      axiosClient.delete(`survey/${id}`).then(() => 
-        {
-          
-          getSurveys()
-          toast.success("Survey Deleted Successfully");
-        }
-      
-      );
-      
+      axiosClient.delete(`survey/${id}`).then(() => {
+        getSurveys();
+        toast.success("Survey Deleted Successfully");
+      });
     }
   };
 
@@ -79,7 +74,9 @@ const Surveys = () => {
               />
             ))}
           </div>
-          {surveys.length > 0 &&<PaginationLinks meta={meta} onPageClick={onPageClick} />}
+          {surveys.length > 0 && (
+            <PaginationLinks meta={meta} onPageClick={onPageClick} />
+          )}
         </div>
       )}
     </PageComponent>

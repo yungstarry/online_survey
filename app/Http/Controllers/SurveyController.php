@@ -134,18 +134,17 @@ class SurveyController extends Controller
     public function destroy(Survey $survey, Request $request)
     {
         $user = $request->user();
-        if($user->id !== $survey->user_id){
+        if ($user->id !== $survey->user_id) {
             return abort(403, 'Unauthorised action.');
         }
 
         $survey->delete();
-        if($survey->image){
+        if ($survey->image) {
             $absolutePath = public_path($survey->image);
             File::delete($absolutePath);
         }
 
         return response('', 204);
-
     }
 
     private function saveImage($image)
@@ -222,5 +221,19 @@ class SurveyController extends Controller
 
             return $question->update($validator->validated());
         }
+    }
+
+    public function getBySlug(Survey $survey)
+    {
+        if (!$survey->status) {
+            return response("", 404);
+        }
+        $currentDate = new \DateTime();
+        $expireDate = new \DateTime($survey->expire_date);
+
+        if($currentDate > $expireDate){
+            return response("", 404);
+        }
+        return new SurveyResource($survey);
     }
 }

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import PageComponent from "../components/PageComponent";
-import { PhotoIcon } from "@heroicons/react/24/outline";
+import { LinkIcon, PhotoIcon, PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import TButton from "../components/core/TButton";
 import axiosClient from "../axios";
 import SurveyQuestions from "../components/SurveyQuestions";
@@ -113,6 +113,10 @@ const SurveyView = () => {
     }));
   };
 
+  const onDelete = () => {
+
+  };
+
   useEffect(() => {
     if (id) {
       setLoading(true);
@@ -123,8 +127,24 @@ const SurveyView = () => {
     }
   }, []);
 
+
+
   return (
-    <PageComponent title={id ? "Update survey" : "Create new Survey"}>
+    <PageComponent
+      title={id ? "Update survey" : "Create new Survey"}
+      buttons={
+        <div className=" flex gap-2">
+          <TButton color="green" href={`/survey/public/${survey.slug}`}>
+            Public Link 
+            <LinkIcon className=" w-4 h-4 ml-2" />
+          </TButton>
+          <TButton color="red" onClick={onDelete}>
+            <TrashIcon className=" w-4 h-4 mr-2" />
+            Delete
+          </TButton>
+        </div>
+      }
+    >
       {loading && (
         <p className=" bg-red-300 rounded-lg items-center justify-center flex p-3">
           Loading.....
@@ -234,6 +254,7 @@ const SurveyView = () => {
                 </div>
               </div>
               {/* Active */}
+
               {/* Survey Questions */}
               <SurveyQuestions
                 questions={survey.questions}
