@@ -48,7 +48,7 @@ const SurveyView = () => {
     mutationFn: createSurvey,
     mutationKey: "survey",
     onSuccess: () => {
-      toast.success("New Survey successfully created");
+      toast.success(id? "Survey Updated Successfully":"New Survey successfully created");
       queryClient.invalidateQueries({
         queryKey: ["survey"],
       });

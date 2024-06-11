@@ -7,6 +7,7 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import axiosClient from "../axios";
 import { PaginationLinks } from "../components/PaginationLinks";
 import router from "../router";
+import toast from "react-hot-toast";
 
 const Surveys = () => {
   // const { surveys } = useStateContext();
@@ -17,7 +18,15 @@ const Surveys = () => {
 
   const onDeleteClick = (id) => {
     if (window.confirm("Are you sure you want to delete this surve")) {
-      axiosClient.delete(`survey/${id}`).then(() => getSurveys());
+      axiosClient.delete(`survey/${id}`).then(() => 
+        {
+          
+          getSurveys()
+          toast.success("Survey Deleted Successfully");
+        }
+      
+      );
+      
     }
   };
 
@@ -56,6 +65,11 @@ const Surveys = () => {
       )}
       {!loading && (
         <div>
+          {surveys.length === 0 && (
+            <div className=" py-8 text-center text-gray-700">
+              You do not have any survey yet
+            </div>
+          )}
           <div className=" grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
             {surveys.map((survey) => (
               <SurveyListItem
@@ -65,7 +79,7 @@ const Surveys = () => {
               />
             ))}
           </div>
-          <PaginationLinks meta={meta} onPageClick={onPageClick} />
+          {surveys.length > 0 &&<PaginationLinks meta={meta} onPageClick={onPageClick} />}
         </div>
       )}
     </PageComponent>
