@@ -4,14 +4,14 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreSurveyAnswerRequest extends FormRequest
+class UpdateDashboardRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -22,7 +22,7 @@ class StoreSurveyAnswerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'answers' => 'required|array'
+            //
         ];
     }
 }

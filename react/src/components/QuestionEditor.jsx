@@ -131,7 +131,7 @@ const QuestionEditor = ({
       </div>
       {/* Description */}
       <div>
-        <pre>{JSON.stringify(model, null, 2)}</pre>
+      
       </div>
       <div>
         {shouldHaveOptions() && (
