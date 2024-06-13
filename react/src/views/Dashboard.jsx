@@ -32,8 +32,8 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-gray-700">
           <DashboardCard
             title="Total Surveys"
-            className="order-1 lg:order-2"
-            style="animation-delay:0.1s"
+            className=" order-1 lg:order-2 "
+            style={{ animationDelay: "0.1s" }}
           >
             <div className="text-8xl pb-4 font-semibold flex-1 flex items-center justify-center">
               {data.totalSurveys}
@@ -41,17 +41,17 @@ const Dashboard = () => {
           </DashboardCard>
           <DashboardCard
             title="Total Answers"
-            className="order-1 lg:order-2"
-            style="animation-delay:0.2s"
+            className=" order-2 lg:order-4"
+            style={{ animationDelay: "0.2s" }}
           >
-            <div className="text-8xl pb-4 font-semibold flex-1 flex items-center justify-center">
+            <div className=" text-8xl pb-4 font-semibold flex-1 flex items-center justify-center">
               {data.totalAnswers}
             </div>
           </DashboardCard>
           <DashboardCard
             title="Latest Survey"
-            className="order-1 lg:order-2"
-            style="animation-delay:0.1s"
+            className=" order-3 lg:order-2 row-span-2"
+            style={{ animationDelay: "0.1s" }}
           >
             {data.latestSurvey && (
               <div>
@@ -60,7 +60,7 @@ const Dashboard = () => {
                   alt=""
                   className="w-[240px] mx-auto"
                 />
-                <h3 className="font-bold text-xl mb-3">
+                <h3 className=" font-bold text-xl mb-3">
                   {data.latestSurvey.title}
                 </h3>
                 <div className=" flex justify-between text-sm mb-1">
@@ -108,8 +108,8 @@ const Dashboard = () => {
 
           <DashboardCard
             title="Latest Answers"
-            className="order-1 lg:order-2 row-span-2"
-            style="animation-delay:0.3s"
+            className="order-4 lg:order-3 row-span-2"
+            style={{ animationDelay: "0.3s" }}
           >
             {data.latestAnswer?.length && (
               <div className=" text-left">
